@@ -12,6 +12,14 @@ pub enum Token {
     // Operators
     Assign,
     Plus,
+    Minus,
+    Bang,
+    Asterisk,
+    Slash,
+    LessThan,
+    GreaterThan,
+    Equal,
+    NotEqual,
 
     // Delimiters
     Comma,
@@ -25,6 +33,11 @@ pub enum Token {
     // Keywords
     Function,
     Let,
+    True,
+    False,
+    If,
+    Else,
+    Return,
 }
 
 pub struct Lexer {
@@ -51,12 +64,34 @@ impl Lexer {
 
         let token = match self.ch {
             Some(t) => match t {
-                '=' => Token::Assign,
+                '=' => {
+                    let ch = self.peek();
+                    if ch.is_some() && ch.unwrap() == '=' {
+                        self.read_char();
+                        Token::Equal
+                    } else {
+                        Token::Assign
+                    }
+                }
+                '!' => {
+                    let ch = self.peek();
+                    if ch.is_some() && ch.unwrap() == '=' {
+                        self.read_char();
+                        Token::NotEqual
+                    } else {
+                        Token::Bang
+                    }
+                }
                 ';' => Token::Semicolon,
                 '(' => Token::LParen,
                 ')' => Token::RParen,
+                '<' => Token::LessThan,
+                '>' => Token::GreaterThan,
                 ',' => Token::Comma,
                 '+' => Token::Plus,
+                '-' => Token::Minus,
+                '/' => Token::Slash,
+                '*' => Token::Asterisk,
                 '{' => Token::LBrace,
                 '}' => Token::RBrace,
                 'a'..='z' | 'A'..='Z' | '_' => {
@@ -64,7 +99,12 @@ impl Lexer {
                     return Ok(match ident.as_str() {
                         "fn" => Token::Function,
                         "let" => Token::Let,
-                        _ => Token::Ident(ident)
+                        "true" => Token::True,
+                        "false" => Token::False,
+                        "if" => Token::If,
+                        "else" => Token::Else,
+                        "return" => Token::Return,
+                        _ => Token::Ident(ident),
                     });
                 }
                 '0'..='9' => {
@@ -89,6 +129,10 @@ impl Lexer {
         } else {
             self.ch = None;
         }
+    }
+
+    fn peek(&self) -> Option<char> {
+        self.input.chars().nth(self.read_position)
     }
 
     fn skip_whitespace(&mut self) {
@@ -161,6 +205,17 @@ mod tests {
         };
 
         let result = add(five, ten);
+        !-/*5;
+        5 < 10 > 5;
+
+        if (5 < 10) {
+            return true;
+        } else {
+            return false;
+        }
+
+        10 == 10;
+        10 != 9;
         "#
         .to_string();
 
@@ -202,6 +257,43 @@ mod tests {
             Token::Comma,
             Token::Ident(String::from("ten")),
             Token::RParen,
+            Token::Semicolon,
+            Token::Bang,
+            Token::Minus,
+            Token::Slash,
+            Token::Asterisk,
+            Token::Int(5),
+            Token::Semicolon,
+            Token::Int(5),
+            Token::LessThan,
+            Token::Int(10),
+            Token::GreaterThan,
+            Token::Int(5),
+            Token::Semicolon,
+            Token::If,
+            Token::LParen,
+            Token::Int(5),
+            Token::LessThan,
+            Token::Int(10),
+            Token::RParen,
+            Token::LBrace,
+            Token::Return,
+            Token::True,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Else,
+            Token::LBrace,
+            Token::Return,
+            Token::False,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Int(10),
+            Token::Equal,
+            Token::Int(10),
+            Token::Semicolon,
+            Token::Int(10),
+            Token::NotEqual,
+            Token::Int(9),
             Token::Semicolon,
             Token::EOF,
         ];
