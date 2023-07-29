@@ -47,6 +47,7 @@ pub struct Lexer {
     ch: Option<char>,
 }
 
+// public API
 impl Lexer {
     pub fn new(source: String) -> Self {
         let mut l = Self {
@@ -120,6 +121,7 @@ impl Lexer {
     }
 }
 
+// private helpers
 impl Lexer {
     fn read_char(&mut self) {
         if let Some(ch) = self.input.chars().nth(self.read_position) {
@@ -151,7 +153,7 @@ impl Lexer {
     }
 
     fn is_ident_char(ch: char) -> bool {
-        'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+        ('a'..='z').contains(&ch) || ('A'..='Z').contains(&ch) || ch == '_'
     }
 
     fn read_int(&mut self) -> i32 {
@@ -187,7 +189,7 @@ mod tests {
 
         for token in tokens {
             let next_token = lexer.next_token()?;
-            println!("expected: {:?}, received {:?}", token, next_token);
+            println!("expected: {token:?}, received {next_token:?}");
             assert_eq!(token, next_token);
         }
 
@@ -300,7 +302,7 @@ mod tests {
 
         for token in tokens {
             let next_token = lexer.next_token()?;
-            println!("expected: {:?}, received {:?}", token, next_token);
+            println!("expected: {token:?}, received {next_token:?}");
             assert_eq!(token, next_token);
         }
 

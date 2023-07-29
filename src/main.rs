@@ -15,7 +15,7 @@ fn main() -> Result<()> {
         let mut lexer = Lexer::new(input);
         let mut current_token = lexer.next_token()?;
         while current_token != Token::EOF {
-            println!("{:?}", current_token);
+            println!("{current_token:?}");
             current_token = lexer.next_token()?;
         }
     }
